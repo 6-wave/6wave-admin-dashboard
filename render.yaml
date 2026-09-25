@@ -1,0 +1,32 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Deploy: push this repo to GitHub, then in Render choose New + → Blueprint.
+services:
+  - type: web
+    name: sound-wave-admin
+    runtime: static
+    # Bun is picked up from bun.lock; its version comes from .bun-version, Node's from .node-version.
+    buildCommand: bun install --frozen-lockfile && bun run build
+    staticPublishPath: dist
+    autoDeploy: true
+    routes:
+      # A single-page app: every path must serve index.html, or refreshing /users/123 gives a 404.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: same-origin
+    envVars:
+      # DEMO ONLY. There is no backend yet, so this turns on made-up data and the public
+      # demo sign-in accounts (see README) so the deployed site is usable. Values are
+      # baked in at build time. REMOVE this variable once the real API is connected, and
+      # never keep it on a site that holds real data.
+      - key: VITE_USE_MOCKS
+        value: "true"
