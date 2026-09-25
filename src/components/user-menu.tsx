@@ -1,7 +1,6 @@
 import { ChevronsUpDown, LogOut } from 'lucide-react'
 import { Form } from 'react-router'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +31,7 @@ export function UserMenu() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs capitalize text-sidebar-foreground/60">{user.role}</span>
+                <span className="truncate text-xs text-sidebar-foreground/60">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -41,7 +40,6 @@ export function UserMenu() {
             <DropdownMenuLabel className="space-y-1">
               <p className="truncate font-medium">{user.name}</p>
               <p className="truncate text-xs font-normal text-muted-foreground">{user.email}</p>
-              <Badge variant="outline" className="capitalize">{user.role}</Badge>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

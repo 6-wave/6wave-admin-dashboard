@@ -6,7 +6,7 @@ import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { DEMO_ACCOUNTS } from '@/lib/auth'
+import { DEMO_ACCOUNT } from '@/lib/auth'
 import { EVENT } from '@/lib/event'
 import { USE_MOCKS } from '@/lib/config'
 import type { LoginResult } from '@/routes/loaders'
@@ -143,23 +143,18 @@ export function LoginPage() {
           {USE_MOCKS ? (
             <div className="space-y-2 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
               <p className="font-semibold text-foreground">Demo mode</p>
-              <p>These accounts only work here, on demo data. Tap one to fill the form.</p>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {DEMO_ACCOUNTS.map((account) => (
-                  <Button
-                    key={account.id}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setEmail(account.email)
-                      setPassword(account.password)
-                    }}
-                  >
-                    {account.role === 'admin' ? 'Admin' : 'Gate staff'}
-                  </Button>
-                ))}
-              </div>
+              <p>This login only works here, on demo data.</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEmail(DEMO_ACCOUNT.email)
+                  setPassword(DEMO_ACCOUNT.password)
+                }}
+              >
+                Fill in the demo login
+              </Button>
             </div>
           ) : null}
         </div>

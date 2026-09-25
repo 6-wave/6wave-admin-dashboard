@@ -49,18 +49,15 @@ export interface Transaction {
   method: PaymentMethod
   status: TransactionStatus
   createdAt: string
-  /** Staff member, for payments taken at the gate. */
+  /** Admin who took the payment, for payments taken at the gate. */
   recordedBy?: string
   failureReason?: string
 }
-
-export type AdminRole = 'admin' | 'staff'
 
 export interface AdminUser {
   id: string
   name: string
   email: string
-  role: AdminRole
 }
 
 /** A user as shown in lists: plus what they bought and how far they've got. */

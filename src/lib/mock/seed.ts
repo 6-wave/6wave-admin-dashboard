@@ -28,7 +28,7 @@ const LAST = [
   'Lawal', 'Eze', 'Afolabi', 'Danjuma', 'Okoro', 'Salako', 'Akinola', 'Umeh', 'Yusuf',
   'Onyeka', 'Fashola', 'Ojo', 'Ajayi', 'Musa', 'Ezekwe', 'Alabi',
 ]
-const STAFF = ['Tobi (staff)', 'Amina (staff)']
+const ADMIN_NAME = 'Amaka Admin'
 
 // Roughly how the sales mix looks: mostly single tickets, a few big tables.
 const WEIGHTS: Record<string, number> = {
@@ -98,7 +98,7 @@ export function buildSeed(now: number = Date.now()): MockDb {
         guestIndex: g,
         status: cancelled ? 'VOID' : used ? 'USED' : 'UNUSED',
         usedAt: used ? new Date(now - rand() * 86_400_000).toISOString() : undefined,
-        scannedBy: used ? pick(STAFF) : undefined,
+        scannedBy: used ? ADMIN_NAME : undefined,
       })
     }
 
@@ -124,7 +124,7 @@ export function buildSeed(now: number = Date.now()): MockDb {
         amount: option.priceNaira,
         method,
         status: 'SUCCESS',
-        recordedBy: method === 'PAYSTACK' ? undefined : pick(STAFF),
+        recordedBy: method === 'PAYSTACK' ? undefined : ADMIN_NAME,
         createdAt: new Date(Date.parse(createdAt) + (10 + rand() * 600) * 60_000).toISOString(),
       })
     }

@@ -1,6 +1,6 @@
 import { buildSeed, type MockDb } from './seed'
 
-const KEY = 'soundwave-admin:mock:v1'
+const KEY = 'soundwave-admin:mock:v2'
 let memory: MockDb | null = null
 
 /** The demo "database" lives in this browser's localStorage. */

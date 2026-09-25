@@ -20,7 +20,6 @@ import {
   loginAction,
   logoutAction,
   passesLoader,
-  settingsLoader,
   settingsAction,
   transactionLoader,
   transactionsLoader,
@@ -40,7 +39,7 @@ import {
  *   /transactions                 all payments (?q= &status= &method= &page=)
  *   /transactions/:reference      one payment
  *   /qr-codes                     every QR code and its check-in state (?q= &status= &page=)
- *   /settings                     admins only
+ *   /settings                     account, theme, event and prices
  *   /payments[/:reference]        old URLs, redirected to /transactions
  *   anything else                 404 (this includes /register)
  *
@@ -115,7 +114,6 @@ export const router = createBrowserRouter([
           },
           {
             path: 'settings',
-            loader: settingsLoader,
             action: settingsAction,
             Component: SettingsPage,
             handle: { crumb: 'Settings' } satisfies RouteHandle,

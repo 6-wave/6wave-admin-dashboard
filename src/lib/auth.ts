@@ -15,20 +15,22 @@ export class AuthError extends Error {
 const SESSION_KEY = 'soundwave-admin:session'
 
 /**
- * Demo accounts, only usable in demo mode (see config.ts). Real accounts are
- * created by an administrator on the server: there is deliberately no way to
- * sign up from this app.
+ * The demo login, only usable in demo mode (see config.ts). There is one kind
+ * of account, admin. Real ones are created on the server: there is
+ * deliberately no way to sign up from this app.
  */
-export const DEMO_ACCOUNTS: (AdminUser & { password: string })[] = [
-  { id: 'adm_1', name: 'Amaka Admin', email: 'admin@soundwave.test', password: 'admin-demo-123', role: 'admin' },
-  { id: 'adm_2', name: 'Tobi Gate', email: 'staff@soundwave.test', password: 'staff-demo-123', role: 'staff' },
-]
+export const DEMO_ACCOUNT: AdminUser & { password: string } = {
+  id: 'adm_1',
+  name: 'Amaka Admin',
+  email: 'admin@soundwave.test',
+  password: 'admin-demo-123',
+}
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 function isAdminUser(value: unknown): value is AdminUser {
   const v = value as Partial<AdminUser> | null
-  return !!v && typeof v.id === 'string' && typeof v.name === 'string' && typeof v.email === 'string' && (v.role === 'admin' || v.role === 'staff')
+  return !!v && typeof v.id === 'string' && typeof v.name === 'string' && typeof v.email === 'string'
 }
 
 /** Who is signed in right now, or null. GET /api/admin/auth/me */
@@ -57,11 +59,11 @@ export async function getSession(): Promise<AdminUser | null> {
 export async function signIn(email: string, password: string): Promise<AdminUser> {
   if (USE_MOCKS) {
     await delay(600)
-    const account = DEMO_ACCOUNTS.find(
-      (a) => a.email === email.trim().toLowerCase() && a.password === password,
-    )
+    const account = DEMO_ACCOUNT
     // Same message whichever part was wrong, so it can't be used to guess accounts.
-    if (!account) throw new AuthError('Wrong email or password.')
+    if (email.trim().toLowerCase() !== account.email || password !== account.password) {
+      throw new AuthError('Wrong email or password.')
+    }
     const { password: _password, ...user } = account
     void _password
     window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(user))

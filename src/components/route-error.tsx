@@ -8,7 +8,7 @@ function describe(error: unknown): { title: string; body: string } {
     if (error.status === 404)
       return { title: 'Not found', body: "We couldn't find that. It may have been removed, or the link is wrong." }
     if (error.status === 403)
-      return { title: 'No access', body: "Your account doesn't have access to this page. Ask an admin if you need it." }
+      return { title: 'No access', body: "You don't have access to this page." }
     if (error.status === 501)
       return { title: 'API not connected', body: "The dashboard isn't connected to the API yet, so there's nothing to show." }
   }

@@ -44,7 +44,6 @@ export function UserDetailPage() {
 
   const open = user.status === 'CONFIRMED'
   const canCollect = open && user.paymentStatus === 'PENDING'
-  const canCancel = canCollect && admin.role === 'admin'
   const paidTx = transactions.find((t) => t.status === 'SUCCESS')
 
   return (
@@ -135,7 +134,7 @@ export function UserDetailPage() {
               {canCollect ? (
                 <Button onClick={() => setPayOpen(true)} disabled={busy}>Record payment</Button>
               ) : null}
-              {canCancel ? (
+              {canCollect ? (
                 <Button variant="destructive" onClick={() => setCancelOpen(true)} disabled={busy}>
                   Cancel registration
                 </Button>

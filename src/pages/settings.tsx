@@ -39,7 +39,6 @@ export function SettingsPage() {
             <dl className="space-y-2">
               <div className="flex justify-between gap-4"><dt className="text-muted-foreground">Name</dt><dd className="font-medium">{admin.name}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-muted-foreground">Email</dt><dd className="truncate font-medium">{admin.email}</dd></div>
-              <div className="flex justify-between gap-4"><dt className="text-muted-foreground">Role</dt><dd><Badge variant="secondary" className="capitalize">{admin.role}</Badge></dd></div>
             </dl>
             <div>
               <p className="mb-2 text-muted-foreground" id="theme-label">Theme</p>

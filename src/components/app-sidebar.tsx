@@ -15,8 +15,6 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { Logo } from '@/components/logo'
-import { useAdmin } from '@/lib/use-admin'
-import type { AdminRole } from '@/lib/types'
 
 const groups = [
   {
@@ -33,13 +31,12 @@ const groups = [
   },
   {
     label: 'System',
-    items: [{ title: 'Settings', to: '/settings', icon: Settings, role: 'admin' as AdminRole }],
+    items: [{ title: 'Settings', to: '/settings', icon: Settings }],
   },
 ]
 
 export function AppSidebar() {
   const { pathname } = useLocation()
-  const { role } = useAdmin()
   const isActive = (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to))
 
   return (
@@ -68,8 +65,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         {groups.map((group) => {
-          const items = group.items.filter((item) => !('role' in item) || item.role === role)
-          if (items.length === 0) return null
+          const items = group.items
           return (
             <SidebarGroup key={group.label}>
               <SidebarGroupLabel>{group.label}</SidebarGroupLabel>

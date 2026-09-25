@@ -121,7 +121,7 @@ export async function getUser(id: string): Promise<UserDetail> {
 
 /**
  * POST /api/admin/users/:id/payments  { method: "POS" | "CASH" }
- * Staff took the money at the gate. The existing QR codes simply become valid.
+ * The money was taken at the gate. The existing QR codes simply become valid.
  */
 export async function recordPayment(
   id: string,

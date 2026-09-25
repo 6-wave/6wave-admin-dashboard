@@ -12,7 +12,6 @@ import {
   resetDemoData,
 } from '@/lib/api'
 import { AuthError, safeNext, sessionContext, signIn, signOut } from '@/lib/auth'
-import { assertRole } from './guards'
 import { readPassesQuery, readTransactionsQuery, readUsersQuery } from './query'
 
 /** Turn the API's errors into responses the route's error screen understands. */
@@ -49,12 +48,6 @@ export const transactionLoader = ({ params }: LoaderFunctionArgs) =>
 export const passesLoader = ({ request }: LoaderFunctionArgs) =>
   call(listPasses(readPassesQuery(search(request))))
 
-/** Settings are for admins; staff get the 403 screen inside the layout. */
-export const settingsLoader = ({ context }: LoaderFunctionArgs) => {
-  assertRole(context, 'admin')
-  return null
-}
-
 // ---- actions ---------------------------------------------------------------
 
 export type ActionResult = { ok: true; message: string } | { ok: false; error: string }
@@ -78,8 +71,6 @@ export async function userAction({
       return { ok: true, message: `Payment recorded (${method === 'POS' ? 'POS' : 'cash'}).` }
     }
     if (intent === 'cancel') {
-      // Cancelling voids the QR codes, so it stays with admins.
-      if (admin.role !== 'admin') return { ok: false, error: 'Only admins can cancel a registration.' }
       await cancelRegistration(id)
       return { ok: true, message: 'Registration cancelled and its QR codes voided.' }
     }
@@ -90,8 +81,7 @@ export async function userAction({
   }
 }
 
-export async function settingsAction({ request, context }: ActionFunctionArgs): Promise<ActionResult> {
-  if (context.get(sessionContext).role !== 'admin') return { ok: false, error: 'Admins only.' }
+export async function settingsAction({ request }: ActionFunctionArgs): Promise<ActionResult> {
   const form = await request.formData()
   if (form.get('intent') === 'reset-demo') {
     try {
