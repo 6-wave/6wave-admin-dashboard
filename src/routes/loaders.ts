@@ -9,7 +9,6 @@ import {
   listTransactions,
   listUsers,
   recordPayment,
-  resetDemoData,
 } from '@/lib/api'
 import { AuthError, safeNext, sessionContext, signIn, signOut } from '@/lib/auth'
 import { METHOD_LABELS } from '@/lib/event'
@@ -54,12 +53,7 @@ export const passesLoader = ({ request }: LoaderFunctionArgs) =>
 export type ActionResult = { ok: true; message: string } | { ok: false; error: string }
 
 /** Record a gate payment, or cancel an unpaid registration. */
-export async function userAction({
-  request,
-  params,
-  context,
-}: ActionFunctionArgs): Promise<ActionResult> {
-  const admin = context.get(sessionContext)
+export async function userAction({ request, params }: ActionFunctionArgs): Promise<ActionResult> {
   const form = await request.formData()
   const intent = form.get('intent')
   const id = params.userId ?? ''
@@ -70,7 +64,7 @@ export async function userAction({
       if (method !== 'POS' && method !== 'CASH' && method !== 'BANK_TRANSFER') {
         return { ok: false, error: 'Choose a payment method.' }
       }
-      await recordPayment(id, method, admin.name)
+      await recordPayment(id, method)
       return { ok: true, message: `Payment recorded (${METHOD_LABELS[method]}).` }
     }
     if (intent === 'cancel') {
@@ -84,19 +78,7 @@ export async function userAction({
   }
 }
 
-export async function settingsAction({ request }: ActionFunctionArgs): Promise<ActionResult> {
-  const form = await request.formData()
-  if (form.get('intent') === 'reset-demo') {
-    try {
-      await resetDemoData()
-      return { ok: true, message: 'Demo data reset.' }
-    } catch (error) {
-      if (error instanceof ApiError) return { ok: false, error: error.message }
-      throw error
-    }
-  }
-  return { ok: false, error: 'Unknown action.' }
-}
+// Settings is commented out for now (see router.tsx), so settingsAction isn't needed either.
 
 // ---- sign in / out ---------------------------------------------------------
 

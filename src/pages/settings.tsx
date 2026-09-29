@@ -1,17 +1,12 @@
 import { useTheme } from 'next-themes'
-import { useFetcher } from 'react-router'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { USE_MOCKS } from '@/lib/config'
 import { EVENT, KIND_LABELS, OPTIONS, getCurrentWave } from '@/lib/event'
 import { formatDate, formatNaira } from '@/lib/format'
-import { useActionToast } from '@/lib/use-action-toast'
 import { useAdmin } from '@/lib/use-admin'
 import { cn } from '@/lib/utils'
-import type { ActionResult } from '@/routes/loaders'
 
 const THEMES = [
   { value: 'light', label: 'Light' },
@@ -22,8 +17,6 @@ const THEMES = [
 export function SettingsPage() {
   const admin = useAdmin()
   const { theme, setTheme } = useTheme()
-  const fetcher = useFetcher<ActionResult>()
-  useActionToast(fetcher.data)
   const currentWave = getCurrentWave()
 
   return (
@@ -114,26 +107,6 @@ export function SettingsPage() {
           </Table>
         </CardContent>
       </Card>
-
-      {USE_MOCKS ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Demo data</CardTitle>
-            <CardDescription>
-              This build is running on made-up data stored in this browser. Nothing here is real or shared.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              variant="outline"
-              disabled={fetcher.state !== 'idle'}
-              onClick={() => fetcher.submit({ intent: 'reset-demo' }, { method: 'post' })}
-            >
-              {fetcher.state === 'idle' ? 'Reset demo data' : 'Resetting…'}
-            </Button>
-          </CardContent>
-        </Card>
-      ) : null}
     </>
   )
 }

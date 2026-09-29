@@ -24,9 +24,6 @@ services:
         name: Referrer-Policy
         value: same-origin
     envVars:
-      # DEMO ONLY. There is no backend yet, so this turns on made-up data and the public
-      # demo sign-in accounts (see README) so the deployed site is usable. Values are
-      # baked in at build time. REMOVE this variable once the real API is connected, and
-      # never keep it on a site that holds real data.
-      - key: VITE_USE_MOCKS
-        value: "true"
+      # Set to the deployed backend's URL. Baked in at build time.
+      - key: VITE_API_BASE_URL
+        sync: false

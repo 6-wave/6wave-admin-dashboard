@@ -1,5 +1,5 @@
 import { createContext } from 'react-router'
-import { API_BASE_URL, USE_MOCKS } from './config'
+import { API_BASE_URL } from './config'
 import type { AdminUser } from './types'
 
 /** The signed-in admin, put there by the route guard and read by loaders and actions. */
@@ -12,22 +12,6 @@ export class AuthError extends Error {
   }
 }
 
-const SESSION_KEY = 'soundwave-admin:session'
-
-/**
- * The demo login, only usable in demo mode (see config.ts). There is one kind
- * of account, admin. Real ones are created on the server: there is
- * deliberately no way to sign up from this app.
- */
-export const DEMO_ACCOUNT: AdminUser & { password: string } = {
-  id: 'adm_1',
-  name: 'Amaka Admin',
-  email: 'admin@soundwave.test',
-  password: 'admin-demo-123',
-}
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
 function isAdminUser(value: unknown): value is AdminUser {
   const v = value as Partial<AdminUser> | null
   return !!v && typeof v.id === 'string' && typeof v.name === 'string' && typeof v.email === 'string'
@@ -35,15 +19,6 @@ function isAdminUser(value: unknown): value is AdminUser {
 
 /** Who is signed in right now, or null. GET /api/admin/auth/me */
 export async function getSession(): Promise<AdminUser | null> {
-  if (USE_MOCKS) {
-    try {
-      const raw = window.sessionStorage.getItem(SESSION_KEY)
-      const parsed: unknown = raw ? JSON.parse(raw) : null
-      return isAdminUser(parsed) ? parsed : null
-    } catch {
-      return null
-    }
-  }
   try {
     // The server keeps the session in an httpOnly cookie; the browser only sends it.
     const response = await fetch(`${API_BASE_URL}/api/admin/auth/me`, { credentials: 'include' })
@@ -57,19 +32,6 @@ export async function getSession(): Promise<AdminUser | null> {
 
 /** POST /api/admin/auth/login  { email, password } */
 export async function signIn(email: string, password: string): Promise<AdminUser> {
-  if (USE_MOCKS) {
-    await delay(600)
-    const account = DEMO_ACCOUNT
-    // Same message whichever part was wrong, so it can't be used to guess accounts.
-    if (email.trim().toLowerCase() !== account.email || password !== account.password) {
-      throw new AuthError('Wrong email or password.')
-    }
-    const { password: _password, ...user } = account
-    void _password
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(user))
-    return user
-  }
-
   let response: Response
   try {
     response = await fetch(`${API_BASE_URL}/api/admin/auth/login`, {
@@ -91,10 +53,6 @@ export async function signIn(email: string, password: string): Promise<AdminUser
 
 /** POST /api/admin/auth/logout */
 export async function signOut(): Promise<void> {
-  if (USE_MOCKS) {
-    window.sessionStorage.removeItem(SESSION_KEY)
-    return
-  }
   try {
     await fetch(`${API_BASE_URL}/api/admin/auth/logout`, { method: 'POST', credentials: 'include' })
   } catch {

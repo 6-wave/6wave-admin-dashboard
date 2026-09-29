@@ -9,7 +9,7 @@ Vite · React 19 · React Router (data mode) · Tailwind v4 · shadcn/ui.
 
 ```bash
 bun install
-bun run dev        # http://localhost:5173, demo mode
+bun run dev        # http://localhost:5173 — needs the backend running too, see .env.example
 bun run build      # typecheck + production build
 bun run lint
 ```
@@ -25,7 +25,7 @@ bun run lint
 | `/transactions` | Payments. `?q=&status=&method=&page=`, CSV export |
 | `/transactions/:reference` | One payment |
 | `/qr-codes` | Every QR code and its check-in state. `?q=&status=&page=` |
-| `/settings` | Account, theme, event and prices (read-only) |
+| `/settings` | Commented out for now (see `router.tsx`), not built yet |
 | `/payments…` | Old URLs, redirect to `/transactions…` |
 | anything else | 404 (including `/register`) |
 
@@ -33,19 +33,12 @@ Every route except `/login` sits behind the auth guard in `src/routes/guards.ts`
 to `/login?next=…` and brought back afterwards (only to paths on this site). Filters and pages live in the
 URL, so any view can be bookmarked or shared.
 
-## Demo mode
+## The real API
 
-In `bun run dev` the app runs on made-up data stored in the browser (`localStorage`), with one demo login:
-`admin@soundwave.test` / `admin-demo-123`.
-
-That password is public. Demo mode is **off** in production builds unless `VITE_USE_MOCKS=true`, and it
-must never be turned on where real data lives. With it off, the demo login and demo data are gone.
-
-## Connecting the real API
-
-The UI talks to one file, [`src/lib/api.ts`](src/lib/api.ts). Today every call there is a demo-mode stub; with
-demo mode off they answer 501 ("API not connected") until each is replaced with a `fetch` to the backend
-(`credentials: 'include'`). Sign-in already calls the real endpoints. Expected contract:
+There is no mock/demo mode anymore — the app always talks to the real backend. All network access goes
+through [`src/lib/api.ts`](src/lib/api.ts) and [`src/lib/auth.ts`](src/lib/auth.ts) (`credentials: 'include'`
+on every call, so the admin session cookie is sent). Set `VITE_API_BASE_URL` (see
+[`.env.example`](.env.example)) to point it at the backend. Contract:
 
 ```
 GET  /api/admin/auth/me            → { id, name, email }   (401 when signed out)
@@ -54,7 +47,7 @@ POST /api/admin/auth/logout
 GET  /api/admin/dashboard
 GET  /api/admin/users?q=&status=&kind=&page=
 GET  /api/admin/users/:id                       → user, passes, transactions
-POST /api/admin/users/:id/payments { method: "POS" | "CASH" }
+POST /api/admin/users/:id/payments { method: "POS" | "CASH" | "BANK_TRANSFER" }
 POST /api/admin/users/:id/cancel                (unpaid only)
 GET  /api/admin/transactions?q=&status=&method=&page=
 GET  /api/admin/transactions/export?q=&status=&method=      → CSV
@@ -62,7 +55,7 @@ GET  /api/admin/transactions/:reference
 GET  /api/admin/passes?q=&status=&page=
 ```
 
-The API must check the session on every request and enforce the "unpaid only" rule itself: nothing here
+The API checks the session on every request and enforces the "unpaid only" rule itself: nothing here
 is a security boundary.
 
 ## Notes
