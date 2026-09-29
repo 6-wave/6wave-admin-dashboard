@@ -1,4 +1,4 @@
-import { USE_MOCKS } from './config'
+import { API_BASE_URL, USE_MOCKS } from './config'
 import { getOption, OPTIONS } from './event'
 import { readDb, resetDb, writeDb } from './mock/store'
 import type { MockDb } from './mock/seed'
@@ -34,6 +34,34 @@ export class ApiError extends Error {
  */
 function requireMocks(): void {
   if (!USE_MOCKS) throw new ApiError("The API isn't connected yet.", 501)
+}
+
+/** Thin fetch wrapper for the real backend: sends the admin session cookie, surfaces its `{ error }` body. */
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...init?.headers },
+    })
+  } catch {
+    throw new ApiError("Can't reach the server. Check your connection.", 0)
+  }
+  if (!response.ok) {
+    let message = response.status === 404 ? 'Not found' : 'Something went wrong. Please try again.'
+    try {
+      const body: unknown = await response.json()
+      if (body && typeof body === 'object' && 'error' in body && typeof body.error === 'string') {
+        message = body.error
+      }
+    } catch {
+      // No JSON body to read; keep the default message.
+    }
+    throw new ApiError(message, response.status)
+  }
+  if (response.status === 204) return undefined as T
+  return (await response.json()) as T
 }
 
 const delay = (ms = 350) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -82,7 +110,14 @@ export interface UsersQuery {
 
 /** GET /api/admin/users?q=&status=&kind=&page= */
 export async function listUsers(query: UsersQuery): Promise<Page<UserRow>> {
-  requireMocks()
+  if (!USE_MOCKS) {
+    const params = new URLSearchParams()
+    if (query.q) params.set('q', query.q)
+    if (query.status) params.set('status', query.status)
+    if (query.kind) params.set('kind', query.kind)
+    params.set('page', String(query.page ?? 1))
+    return apiFetch<Page<UserRow>>(`/api/admin/users?${params.toString()}`)
+  }
   await delay()
   const db = readDb()
   const q = query.q?.trim()
@@ -108,7 +143,7 @@ export async function listUsers(query: UsersQuery): Promise<Page<UserRow>> {
 
 /** GET /api/admin/users/:id */
 export async function getUser(id: string): Promise<UserDetail> {
-  requireMocks()
+  if (!USE_MOCKS) return apiFetch<UserDetail>(`/api/admin/users/${encodeURIComponent(id)}`)
   await delay(250)
   const db = readDb()
   const user = findUser(db, id)
@@ -120,15 +155,21 @@ export async function getUser(id: string): Promise<UserDetail> {
 }
 
 /**
- * POST /api/admin/users/:id/payments  { method: "POS" | "CASH" }
- * The money was taken at the gate. The existing QR codes simply become valid.
+ * POST /api/admin/users/:id/payments  { method: "POS" | "CASH" | "BANK_TRANSFER" }
+ * The money was taken at the gate or by bank transfer. The existing QR codes simply become valid.
+ * `actor` is only used in demo mode; the real backend records who's signed in itself.
  */
 export async function recordPayment(
   id: string,
-  method: Extract<PaymentMethod, 'POS' | 'CASH'>,
+  method: Extract<PaymentMethod, 'POS' | 'CASH' | 'BANK_TRANSFER'>,
   actor: string,
 ): Promise<UserDetail> {
-  requireMocks()
+  if (!USE_MOCKS) {
+    return apiFetch<UserDetail>(`/api/admin/users/${encodeURIComponent(id)}/payments`, {
+      method: 'POST',
+      body: JSON.stringify({ method }),
+    })
+  }
   await delay()
   const db = readDb()
   const user = findUser(db, id)
@@ -151,7 +192,9 @@ export async function recordPayment(
 
 /** POST /api/admin/users/:id/cancel: only for registrations nobody has paid for. */
 export async function cancelRegistration(id: string): Promise<UserDetail> {
-  requireMocks()
+  if (!USE_MOCKS) {
+    return apiFetch<UserDetail>(`/api/admin/users/${encodeURIComponent(id)}/cancel`, { method: 'POST' })
+  }
   await delay()
   const db = readDb()
   const user = findUser(db, id)

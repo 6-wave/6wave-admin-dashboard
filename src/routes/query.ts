@@ -17,7 +17,7 @@ export function readPage(params: URLSearchParams): number {
 export const USER_STATUSES = ['paid', 'pending', 'cancelled'] as const
 export const KINDS = ['TICKET', 'GROUP', 'TABLE'] as const satisfies readonly PurchaseKind[]
 export const TRANSACTION_STATUSES = ['SUCCESS', 'PENDING', 'FAILED', 'ABANDONED'] as const satisfies readonly TransactionStatus[]
-export const METHODS = ['PAYSTACK', 'POS', 'CASH'] as const satisfies readonly PaymentMethod[]
+export const METHODS = ['PAYSTACK', 'POS', 'CASH', 'BANK_TRANSFER'] as const satisfies readonly PaymentMethod[]
 export const PASS_STATUSES = ['UNUSED', 'USED', 'VOID'] as const satisfies readonly PassStatus[]
 
 export function readUsersQuery(params: URLSearchParams) {

@@ -37,6 +37,7 @@ export const METHOD_LABELS: Record<PaymentMethod, string> = {
   PAYSTACK: 'Paystack',
   POS: 'POS',
   CASH: 'Cash',
+  BANK_TRANSFER: 'Bank Transfer',
 }
 
 /** Today in Lagos as YYYY-MM-DD. */

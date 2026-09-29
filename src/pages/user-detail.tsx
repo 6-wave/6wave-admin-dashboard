@@ -1,5 +1,5 @@
-import { Banknote, CreditCard, Mail, Phone } from 'lucide-react'
-import { useState } from 'react'
+import { Banknote, Building2, CreditCard, Mail, Phone } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Link, useFetcher, useLoaderData } from 'react-router'
 import { CopyButton } from '@/components/copy-button'
 import { PageHeader } from '@/components/page-header'
@@ -29,7 +29,13 @@ import { useAdmin } from '@/lib/use-admin'
 import { cn } from '@/lib/utils'
 import type { ActionResult } from '@/routes/loaders'
 
-type Method = 'POS' | 'CASH'
+type Method = 'POS' | 'CASH' | 'BANK_TRANSFER'
+
+const METHOD_ICONS: Record<Method, ReactNode> = {
+  POS: <CreditCard className="size-4" />,
+  CASH: <Banknote className="size-4" />,
+  BANK_TRANSFER: <Building2 className="size-4" />,
+}
 
 export function UserDetailPage() {
   const { user, passes, transactions } = useLoaderData() as UserDetail
@@ -113,9 +119,9 @@ export function UserDetailPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {canCollect ? (
-              <fieldset className="grid grid-cols-2 gap-2" disabled={busy}>
+              <fieldset className="grid grid-cols-3 gap-2" disabled={busy}>
                 <legend className="sr-only">How they paid</legend>
-                {(['POS', 'CASH'] as const).map((value) => (
+                {(['POS', 'CASH', 'BANK_TRANSFER'] as const).map((value) => (
                   <label
                     key={value}
                     className={cn(
@@ -124,8 +130,8 @@ export function UserDetailPage() {
                     )}
                   >
                     <input type="radio" name="method" value={value} checked={method === value} onChange={() => setMethod(value)} className="sr-only" />
-                    {value === 'POS' ? <CreditCard className="size-4" /> : <Banknote className="size-4" />}
-                    {value === 'POS' ? 'POS' : 'Cash'}
+                    {METHOD_ICONS[value]}
+                    {METHOD_LABELS[value]}
                   </label>
                 ))}
               </fieldset>
@@ -228,7 +234,7 @@ export function UserDetailPage() {
           <DialogHeader>
             <DialogTitle>Record {formatNaira(user.amount)} as paid?</DialogTitle>
             <DialogDescription>
-              {user.fullName} paid by {method === 'POS' ? 'POS' : 'cash'} at the gate. This is logged under your name
+              {user.fullName} paid by {METHOD_LABELS[method]}. This is logged under your name
               ({admin.name}) and can't be undone here.
             </DialogDescription>
           </DialogHeader>

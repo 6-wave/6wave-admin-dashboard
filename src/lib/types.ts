@@ -12,7 +12,7 @@ export interface PurchaseOption {
 
 export type PaymentStatus = 'PENDING' | 'PAID'
 export type RegistrationStatus = 'CONFIRMED' | 'CANCELLED'
-export type PaymentMethod = 'PAYSTACK' | 'POS' | 'CASH'
+export type PaymentMethod = 'PAYSTACK' | 'POS' | 'CASH' | 'BANK_TRANSFER'
 export type TransactionStatus = 'SUCCESS' | 'PENDING' | 'FAILED' | 'ABANDONED'
 export type PassStatus = 'UNUSED' | 'USED' | 'VOID'
 

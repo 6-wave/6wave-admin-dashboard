@@ -12,6 +12,7 @@ import {
   resetDemoData,
 } from '@/lib/api'
 import { AuthError, safeNext, sessionContext, signIn, signOut } from '@/lib/auth'
+import { METHOD_LABELS } from '@/lib/event'
 import { readPassesQuery, readTransactionsQuery, readUsersQuery } from './query'
 
 /** Turn the API's errors into responses the route's error screen understands. */
@@ -66,9 +67,11 @@ export async function userAction({
   try {
     if (intent === 'record-payment') {
       const method = form.get('method')
-      if (method !== 'POS' && method !== 'CASH') return { ok: false, error: 'Choose POS or cash.' }
+      if (method !== 'POS' && method !== 'CASH' && method !== 'BANK_TRANSFER') {
+        return { ok: false, error: 'Choose a payment method.' }
+      }
       await recordPayment(id, method, admin.name)
-      return { ok: true, message: `Payment recorded (${method === 'POS' ? 'POS' : 'cash'}).` }
+      return { ok: true, message: `Payment recorded (${METHOD_LABELS[method]}).` }
     }
     if (intent === 'cancel') {
       await cancelRegistration(id)
