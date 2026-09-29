@@ -64,6 +64,18 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T
 }
 
+/** Like apiFetch, but for the CSV export endpoint, which returns plain text, not JSON. */
+async function apiFetchText(path: string): Promise<string> {
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, { credentials: 'include' })
+  } catch {
+    throw new ApiError("Can't reach the server. Check your connection.", 0)
+  }
+  if (!response.ok) throw new ApiError('Something went wrong. Please try again.', response.status)
+  return response.text()
+}
+
 const delay = (ms = 350) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // ---- helpers ---------------------------------------------------------------
@@ -258,9 +270,21 @@ function filterTransactions(db: MockDb, query: TransactionsQuery): TransactionRo
     )
 }
 
+function transactionsParams(query: Omit<TransactionsQuery, 'page'>): URLSearchParams {
+  const params = new URLSearchParams()
+  if (query.q) params.set('q', query.q)
+  if (query.status) params.set('status', query.status)
+  if (query.method) params.set('method', query.method)
+  return params
+}
+
 /** GET /api/admin/transactions?q=&status=&method=&page= */
 export async function listTransactions(query: TransactionsQuery): Promise<TransactionsPage> {
-  requireMocks()
+  if (!USE_MOCKS) {
+    const params = transactionsParams(query)
+    params.set('page', String(query.page ?? 1))
+    return apiFetch<TransactionsPage>(`/api/admin/transactions?${params.toString()}`)
+  }
   await delay()
   const rows = filterTransactions(readDb(), query)
   const success = rows.filter((t) => t.status === 'SUCCESS')
@@ -284,7 +308,7 @@ function csvCell(value: string | number): string {
 
 /** GET /api/admin/transactions/export?q=&status=&method= (every match, not one page) */
 export async function exportTransactionsCsv(query: Omit<TransactionsQuery, 'page'>): Promise<string> {
-  requireMocks()
+  if (!USE_MOCKS) return apiFetchText(`/api/admin/transactions/export?${transactionsParams(query).toString()}`)
   await delay(200)
   const header = ['Reference', 'Date', 'Person', 'Registration', 'Purchase', 'Amount (NGN)', 'Method', 'Status', 'Recorded by']
   const lines = filterTransactions(readDb(), query).map((t) =>
@@ -297,7 +321,7 @@ export async function exportTransactionsCsv(query: Omit<TransactionsQuery, 'page
 
 /** GET /api/admin/transactions/:reference */
 export async function getTransaction(reference: string): Promise<TransactionRow> {
-  requireMocks()
+  if (!USE_MOCKS) return apiFetch<TransactionRow>(`/api/admin/transactions/${encodeURIComponent(reference)}`)
   await delay(250)
   const db = readDb()
   const t = db.transactions.find((x) => x.reference === reference)
@@ -319,7 +343,13 @@ export interface PassesPage extends Page<PassRow> {
 
 /** GET /api/admin/passes?q=&status=&page= (q also matches a pasted token) */
 export async function listPasses(query: PassesQuery): Promise<PassesPage> {
-  requireMocks()
+  if (!USE_MOCKS) {
+    const params = new URLSearchParams()
+    if (query.q) params.set('q', query.q)
+    if (query.status) params.set('status', query.status)
+    params.set('page', String(query.page ?? 1))
+    return apiFetch<PassesPage>(`/api/admin/passes?${params.toString()}`)
+  }
   await delay()
   const db = readDb()
   const q = query.q?.trim()
@@ -364,7 +394,7 @@ export interface DashboardData {
 
 /** GET /api/admin/dashboard */
 export async function getDashboard(): Promise<DashboardData> {
-  requireMocks()
+  if (!USE_MOCKS) return apiFetch<DashboardData>('/api/admin/dashboard')
   await delay(300)
   const db = readDb()
   const live = db.users.filter((u) => u.status !== 'CANCELLED')

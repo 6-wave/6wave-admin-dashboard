@@ -1,4 +1,4 @@
-import { CreditCard, LayoutDashboard, QrCode, Settings, Users } from 'lucide-react'
+import { CreditCard, LayoutDashboard, QrCode, Users } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router'
 import { UserMenu } from '@/components/user-menu'
 import {
@@ -29,10 +29,11 @@ const groups = [
       { title: 'QR codes', to: '/qr-codes', icon: QrCode },
     ],
   },
-  {
-    label: 'System',
-    items: [{ title: 'Settings', to: '/settings', icon: Settings }],
-  },
+  // Commented out for now, not built yet:
+  // {
+  //   label: 'System',
+  //   items: [{ title: 'Settings', to: '/settings', icon: Settings }],
+  // },
 ]
 
 export function AppSidebar() {

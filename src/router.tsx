@@ -6,7 +6,7 @@ import { DashboardPage } from '@/pages/dashboard'
 import { LoginPage } from '@/pages/login'
 import { NotFoundPage } from '@/pages/not-found'
 import { QrCodesPage } from '@/pages/qr-codes'
-import { SettingsPage } from '@/pages/settings'
+// import { SettingsPage } from '@/pages/settings' // Commented out for now, not built yet.
 import { TransactionDetailPage } from '@/pages/transaction-detail'
 import { TransactionsPage } from '@/pages/transactions'
 import { UserDetailPage } from '@/pages/user-detail'
@@ -20,7 +20,7 @@ import {
   loginAction,
   logoutAction,
   passesLoader,
-  settingsAction,
+  // settingsAction, // Commented out for now, not built yet.
   transactionLoader,
   transactionsLoader,
   userAction,
@@ -39,7 +39,7 @@ import {
  *   /transactions                 all payments (?q= &status= &method= &page=)
  *   /transactions/:reference      one payment
  *   /qr-codes                     every QR code and its check-in state (?q= &status= &page=)
- *   /settings                     account, theme, event and prices
+ *   /settings                     commented out for now, not built yet
  *   /payments[/:reference]        old URLs, redirected to /transactions
  *   anything else                 404 (this includes /register)
  *
@@ -112,12 +112,13 @@ export const router = createBrowserRouter([
             Component: QrCodesPage,
             handle: { crumb: 'QR codes' } satisfies RouteHandle,
           },
-          {
-            path: 'settings',
-            action: settingsAction,
-            Component: SettingsPage,
-            handle: { crumb: 'Settings' } satisfies RouteHandle,
-          },
+          // Commented out for now, not built yet:
+          // {
+          //   path: 'settings',
+          //   action: settingsAction,
+          //   Component: SettingsPage,
+          //   handle: { crumb: 'Settings' } satisfies RouteHandle,
+          // },
           { path: 'payments', loader: () => redirect('/transactions') },
           { path: 'payments/:reference', loader: ({ params }) => redirect(`/transactions/${params.reference ?? ''}`) },
           { path: '*', Component: NotFoundPage, handle: { crumb: 'Not found' } satisfies RouteHandle },
